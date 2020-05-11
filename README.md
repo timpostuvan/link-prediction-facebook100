@@ -1,2 +1,2 @@
 # Link prediction
-Link prediction on facebook100 dataset.
+Link prediction on Facebook100 dataset.
