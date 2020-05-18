@@ -2,7 +2,7 @@ import os
 import networkx as nx
 import math
 import random
-
+from similarity_scores import SimilarityScores
 
 feature_names = ["from_id", "to_id", "is_dorm", "is_year", "year_diff", "from_high_school",
 				 "to_high_school", "from_major", "to_major", "is_faculty", "is_gender", "label"]
@@ -19,59 +19,6 @@ attribute_dict = {
     "high_school" : 6,
     }
 
-
-#---------------------------------------------------------------------------
-
-class SimilartyScores:
-	@staticmethod
-	def preferential_attachment(G, x, y):
-		degrees = G.degree
-		return degrees[x] * degrees[y]
-
-
-	@staticmethod
-	def jaccard(G, x, y):
-		neighbors_x = set([node for node in G.neighbors(x)]) 
-		
-		common = 0.0
-		for node in G.neighbors(y):
-			if(node in neighbors_x):
-				common += 1
-
-		if(len(G[x]) + len(G[y]) == 0):
-			return 1.0
-
-		val = 1.0 * common / (len(G[x]) + len(G[y]) - common)
-		return val
-
-
-	@staticmethod
-	def adamic_adar(G, x, y):
-		degrees = G.degree
-		neighbors_x = set([node for node in G.neighbors(x)]) 
-		
-		val = 0.0
-		for node in G.neighbors(y):
-			if(node in neighbors_x):
-				val += math.log2(degrees[node])
-
-		return val
-
-
-	@staticmethod
-	def resource_allocation(G, x, y):
-		degrees = G.degree
-		neighbors_x = set([node for node in G.neighbors(x)]) 
-		
-		val = 0.0
-		for node in G.neighbors(y):
-			if(node in neighbors_x):
-				val += degrees[node]
-
-		return val
-
-
-#----------------------------------------------------------------------------
 
 
 def output_feature_set(file_path, data_features):
@@ -201,10 +148,10 @@ def create_topological_features(G, data_features):
 	for instance in data_features:
 		x, y = instance[:2]
 
-		preferential = SimilartyScores.preferential_attachment(G, x, y)
-		jaccard = SimilartyScores.jaccard(G, x, y)
-		adamic_adar = SimilartyScores.adamic_adar(G, x, y)
-		resource_allocation = SimilartyScores.resource_allocation(G, x, y)
+		preferential = SimilarityScores.preferential_attachment(G, x, y)
+		jaccard = SimilarityScores.jaccard(G, x, y)
+		adamic_adar = SimilarityScores.adamic_adar(G, x, y)
+		resource_allocation = SimilarityScores.resource_allocation(G, x, y)
 
 		data_topological_features.append([preferential, jaccard, adamic_adar, resource_allocation, *instance[2:]])
 
@@ -246,21 +193,21 @@ def create_test_links(G, percentage):
 
 
 
-path = "./data/"
-file_names = os.listdir(path)
+if(__name__ == "__main__"):
+	path = "./data/"
+	file_names = os.listdir(path)
 
+	for file_name in file_names:
+		file_path = path + "/" + file_name + "/" + file_name
+		print("File:", file_name)
 
-for file_name in file_names:
-	file_path = path + "/" + file_name + "/" + file_name
-	print("File:", file_name)
+		G = read_graph(file_path)
+		positive_labeled, negative_labeled = create_test_links(G, 0.02)
+		data = positive_labeled
+		data.extend(negative_labeled)
 
-	G = read_graph(file_path)
-	positive_labeled, negative_labeled = create_test_links(G, 0.02)
-	data = positive_labeled
-	data.extend(negative_labeled)
+		data_features = create_features(G, data)
+		data_topological_features = create_topological_features(G, data_features)
 
-	data_features = create_features(G, data)
-	data_topological_features = create_topological_features(G, data_features)
-
-	output_feature_set(file_path, data_features)
-	output_topological_feature_set(file_path, data_topological_features)
+		output_feature_set(file_path, data_features)
+		output_topological_feature_set(file_path, data_topological_features)
