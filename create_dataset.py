@@ -234,6 +234,9 @@ def create_test_links(G, percentage):
 		   (x, y) not in negative and (y, x) not in negative):
 			negative.add((x, y))
 
+	for edge in positive:
+		G.remove_edge(*edge)
+
 	positive_labeled = [(x, y, 1) for x, y in positive]
 	negative_labeled = [(x, y, 0) for x, y in negative]
 
