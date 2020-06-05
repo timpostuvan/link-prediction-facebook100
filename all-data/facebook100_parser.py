@@ -73,12 +73,12 @@ def get_attribute_partition(matlab_object, attribute):
     return values
 
 
-
 if __name__ == '__main__':
     if not os.path.isdir("./facebook100/"):
         os.mkdir("./facebook100/")
 
-    matlab_files = glob.glob("./*.mat")
+    matlab_files = glob.glob("./data/*.mat")
+    print(onlyfiles)
     matlab_files = filter(lambda fn: not("schools.mat" in fn), matlab_files)
     for matlab_filename in matlab_files:
         network_name = matlab_filename.strip(".").strip("/").split("/")[-1].split(".")[0]
