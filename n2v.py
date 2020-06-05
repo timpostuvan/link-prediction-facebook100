@@ -4,41 +4,38 @@
 # <h1>Table of Contents<span class="tocSkip"></span></h1>
 # <div class="toc"><ul class="toc-item"></ul></div>
 
-# In[ ]:
+# In[60]:
 
 
 import networkx as nx
 import pandas as pd
-import matplotlib.pyplot as plt
 import numpy as np
 from node2vec import Node2Vec
 from node2vec.edges import HadamardEmbedder
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import normalize
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix,classification_report,roc_auc_score
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn import decomposition, datasets
-from sklearn.manifold import TSNE
 import os
 import multiprocessing as mp
 import warnings
+from sklearn.model_selection import train_test_split
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 
-# In[ ]:
+# In[61]:
 
 
 class getNode2Vec:
-    def __init__(self, path,dim):
+    def __init__(self, path, dim, num_walks, q, walk_length):
         self.G = nx.Graph(nx.read_pajek(path + '.net'), nodetype=int)
         raw_data = pd.read_csv(path + '.raw_data', sep='\t')
-        self.pos_e = raw_data[raw_data['label']==1][['from_id','to_id']].values
-        self.e = raw_data[['from_id','to_id']].values
+        self.pos_e = raw_data[raw_data['label'] == 1][['from_id',
+                                                       'to_id']].values
+        self.e = raw_data[['from_id', 'to_id']].values
+        self.nodes = raw_data[['from_id', 'to_id']]
         self.labels = raw_data[['label']]
         self.dim = dim
+        self.path = path
+        self.num_walks = num_walks
+        self.q = q
+        self.walk_length = walk_length
 
     def remove_edges(self):
         for val in self.pos_e:
@@ -47,55 +44,105 @@ class getNode2Vec:
     def gen_node2vec(self):
         # Remove positive edges from graph:
         self.remove_edges()
-        node2vec = Node2Vec(self.G,
-                            dimensions=self.dim,
-                            walk_length=100,
-                            num_walks=18,
-                            workers=5,
-                            p=0.13,
-                            q=0.13,
-                            temp_folder='./temp/')  # Use temp_folder for big graphs
+        node2vec = Node2Vec(
+            self.G,
+            dimensions=self.dim,  #lower dim
+            walk_length=self.walk_length,  #shorter walk than 100
+            num_walks=self.num_walks,  # bigger number than 10
+            workers=5,
+            p=1,  #p = 1
+            q=self.q,  #q < 1
+            temp_folder='./temp/')  # Use temp_folder for big graphs
         # Embed nodes
         n2v_df = pd.DataFrame()
-        model = node2vec.fit(
-        )  #Use over gensim word2vec
+        model = node2vec.fit()  #Use over gensim word2vec
         edges_embs = HadamardEmbedder(keyed_vectors=model.wv)
         # Edges:
         for e in self.e:
             v = edges_embs[(str(e[0]), str(e[1]))]
             res = dict(('d' + str(i), el) for i, el in enumerate(v))
             n2v_df = n2v_df.append(res, ignore_index=True)
-            
-        return pd.concat([n2v_df, self.labels], axis=1)
+
+        return pd.concat([self.nodes, n2v_df, self.labels], axis=1)
+
+    def get_n2v(self):
+        data = gen_node2vec()
+        data.to_csv(self.path + 'emb.csv')
+
+
+# In[65]:
+
+
+def main():
+    #get all dirs in data folder and parse every network there
+    dirs = [_dir  for _dir in os.listdir('./data/') if os.path.isdir("./data/{}".format(_dir)) ]
+    for x in dirs:
+        print(x)
+
+    def ww(p):
+        #Configuration id=68
+        m = getNode2Vec(p, dim=64, num_walks=50, q=0.8, walk_length=20)
+        emb_model = m.gen_node2vec()
+        emb_model.to_csv(p + 'emb.csv.gz', compression='gzip', index=False)
+        print('FINISHED WITH:', p)
+
+    proc = []
+    for net in dirs:
+        path = "./data/{}/{}".format(net, net)
+        p = mp.Process(target=ww, args=(path, ))
+        p.start()
+        proc.append(p)
+    for p in proc:
+        p.join()
+
+
+# In[66]:
+
+
+def merge_data():
+    dirs = [
+        _dir for _dir in os.listdir('./data/')
+        if os.path.isdir("./data/{}".format(_dir))
+    ]
+    for x in dirs:
+        print(x)
+    networks_data = []
+    for net in dirs:
+        path = "./data/{}/{}".format(net, net)
+        data = pd.read_csv(path + 'emb.csv.gz', compression='gzip', sep=',')
+        raw_data = pd.read_csv(path + '.raw_data', sep='\t')
+        raw_data = raw_data[[
+            "is_dorm", "is_year", "year_diff", "from_high_school",
+            "to_high_school", "from_major", "to_major", "is_faculty",
+            "is_gender"
+        ]]
+        data = pd.concat([raw_data,data],axis = 1)
+        networks_data.append(data)
+
+    networks_data = pd.concat(networks_data, axis=0)
+    
+    networks_data = networks_data.drop(columns=['from_id', 'to_id'])
+
+    train, test = train_test_split(networks_data, test_size=0.25)
+    train.to_csv('./data/node2vec_v2_train.csv.gz',compression='gzip',sep='\t')
+    test.to_csv('./data/node2vec_v2_test.csv.gz',compression='gzip',sep='\t')
+    print('Train:',train.info())
+    print('Test:',test.info())
+
+
+# In[67]:
+
+
+if __name__ == "__main__":
+    #main()
+    print('main')
+    #merge_data()
 
 
 # In[ ]:
 
 
-dirs = os.listdir('./data/')
-for x in dirs:
-    print(x)
 
-
-def ww(p):
-    m = getNode2Vec(p, 100)
-    emb_model = m.gen_node2vec()
-    emb_model.to_csv(p + 'emb.csv')
-    print('FINISHED WITH:', p)
-
-
-# Step 1: Init multiprocessing.Pool()
-pool = mp.Pool(mp.cpu_count() - 1)
-# Step 2: `pool.apply` the `howmany_within_range()`
-
-proc = []
-for net in dirs:
-    path = "./data/{}/{}".format(net, net)
-    p = mp.Process(target=ww,args=(path,))
-    p.start()
-    proc.append(p)
-for p in proc:
-    p.join()
 
 
 # In[ ]:
