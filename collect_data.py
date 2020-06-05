@@ -12,7 +12,7 @@ def partition_dataset(data, train_percentage):
 
 
 if(__name__ == "__main__"):
-	path = "./data/"
+	path = "./unseen-data/"
 	file_names = os.listdir(path)
 
 	columns = None
@@ -32,15 +32,15 @@ if(__name__ == "__main__"):
 			all_data = np.vstack((all_data, curret_data.to_numpy()))
 
 
-	train_data, test_data = partition_dataset(all_data, 0.8)
+	train_data, test_data = partition_dataset(all_data, 0.0)
 	topological_train_data = pd.DataFrame(train_data, columns=columns)	
 	topological_test_data = pd.DataFrame(test_data, columns=columns)
 
 	baseline_train_data = topological_train_data.iloc[:, [0, 1, 2, 3, -1]]
 	baseline_test_data = topological_test_data.iloc[:, [0, 1, 2, 3, -1]]
 
-	topological_train_data.to_csv("./data/topological_train.data", sep="\t", index=False)
-	topological_test_data.to_csv("./data/topological_test.data", sep="\t", index=False)
+	topological_train_data.to_csv("./unseen-data/topological_train.data", sep="\t", index=False)
+	topological_test_data.to_csv("./unseen-data/topological_test.data", sep="\t", index=False)
 
-	baseline_train_data.to_csv("./data/baseline_train.data", sep="\t", index=False)
-	baseline_test_data.to_csv("./data/baseline_test.data", sep="\t", index=False)
+	baseline_train_data.to_csv("./unseen-data/baseline_train.data", sep="\t", index=False)
+	baseline_test_data.to_csv("./unseen-data/baseline_test.data", sep="\t", index=False)
