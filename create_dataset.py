@@ -194,7 +194,7 @@ def create_test_links(G, percentage):
 
 
 if(__name__ == "__main__"):
-	path = "./data/"
+	path = "./unseen-data/"
 	file_names = os.listdir(path)
 
 	for file_name in file_names:
