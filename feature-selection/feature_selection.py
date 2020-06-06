@@ -16,6 +16,7 @@ def read_data(file_name):
 	
 	# Read and rescale train data	
 	data = pd.read_table("../data/" + file_name + "_train.data")
+	
 	# Shuffle data
 	data = shuffle(data)
 	train_data = data
@@ -56,9 +57,10 @@ def write_data(file_name, columns):
 
 
 
-X_train, X_test, y_train, y_test, features, data = read_data("baseline")
+#X_train, X_test, y_train, y_test, features, data = read_data("baseline")
 #X_train, X_test, y_train, y_test, features, data = read_data("topological")
 #X_train, X_test, y_train, y_test, features, data = read_data("node2vec")
+X_train, X_test, y_train, y_test, features, data = read_data("node_based")
 
 
 print("Data read")
@@ -66,7 +68,7 @@ print("Data read")
 SVM_classifier = SVC(kernel="linear")
 
 rfecv = RFECV(estimator=SVM_classifier, step=1, cv=StratifiedKFold(5),
-              scoring='accuracy', n_jobs=3)
+              scoring='accuracy', n_jobs=-1,verbose=True)
 rfecv.fit(X_train, y_train)
 
 print("Optimal number of features : %d" % rfecv.n_features_)
@@ -77,7 +79,7 @@ print(selected_features)
 
 
 
-write_data("baseline", selected_features)
+#write_data("baseline", selected_features)
 #write_data("topological", selected_features)
 #write_data("node2vec", selected_features)
 
