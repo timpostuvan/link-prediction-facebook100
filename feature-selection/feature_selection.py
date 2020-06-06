@@ -56,8 +56,8 @@ def write_data(file_name, columns):
 
 
 
-X_train, X_test, y_train, y_test, features, data = read_data("baseline")
-#X_train, X_test, y_train, y_test, features, data = read_data("topological")
+#X_train, X_test, y_train, y_test, features, data = read_data("baseline")
+X_train, X_test, y_train, y_test, features, data = read_data("topological")
 #X_train, X_test, y_train, y_test, features, data = read_data("node2vec")
 
 
