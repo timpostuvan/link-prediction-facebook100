@@ -4,7 +4,7 @@
 # <h1>Table of Contents<span class="tocSkip"></span></h1>
 # <div class="toc"><ul class="toc-item"></ul></div>
 
-# In[60]:
+# In[1]:
 
 
 import networkx as nx
@@ -19,7 +19,7 @@ from sklearn.model_selection import train_test_split
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 
-# In[61]:
+# In[2]:
 
 
 class getNode2Vec:
@@ -70,12 +70,15 @@ class getNode2Vec:
         data.to_csv(self.path + 'emb.csv')
 
 
-# In[65]:
+# In[3]:
 
 
-def main():
+def main(rootFolder):
     #get all dirs in data folder and parse every network there
-    dirs = [_dir  for _dir in os.listdir('./data/') if os.path.isdir("./data/{}".format(_dir)) ]
+    dirs = [
+        _dir for _dir in os.listdir(f'./{rootFolder}/')
+        if os.path.isdir(f"./{rootFolder}/{_dir}")
+    ] 
     for x in dirs:
         print(x)
 
@@ -88,7 +91,7 @@ def main():
 
     proc = []
     for net in dirs:
-        path = "./data/{}/{}".format(net, net)
+        path = f"./{rootFolder}/{net}/{net}"
         p = mp.Process(target=ww, args=(path, ))
         p.start()
         proc.append(p)
@@ -96,19 +99,19 @@ def main():
         p.join()
 
 
-# In[66]:
+# In[4]:
 
 
-def merge_data():
+def merge_data(rootFolder):
     dirs = [
-        _dir for _dir in os.listdir('./data/')
-        if os.path.isdir("./data/{}".format(_dir))
+        _dir for _dir in os.listdir(f'./{rootFolder}/')
+        if os.path.isdir(f"./{rootFolder}/{_dir}")
     ]
     for x in dirs:
         print(x)
     networks_data = []
     for net in dirs:
-        path = "./data/{}/{}".format(net, net)
+        path = f"./{rootFolder}/{net}/{net}"
         data = pd.read_csv(path + 'emb.csv.gz', compression='gzip', sep=',')
         raw_data = pd.read_csv(path + '.raw_data', sep='\t')
         raw_data = raw_data[[
@@ -122,15 +125,19 @@ def merge_data():
     networks_data = pd.concat(networks_data, axis=0)
     
     networks_data = networks_data.drop(columns=['from_id', 'to_id'])
-
+    '''
+    FOR UNSEEN DATA :
+    data = pd.concat([train,test],axis=0)
+    data.to_csv('./unseen-data/node2vec_v2_data.csv.gz',compression='gzip',sep='\t',index=False)
+    '''
     train, test = train_test_split(networks_data, test_size=0.25)
-    train.to_csv('./data/node2vec_v2_train.csv.gz',compression='gzip',sep='\t')
-    test.to_csv('./data/node2vec_v2_test.csv.gz',compression='gzip',sep='\t')
+    train.to_csv(f'./{rootFolder}/node2vec_v2_train.csv.gz', compression='gzip', sep='\t', index=False)
+    networks_data.to_csv(f'./{rootFolder}/node2vec_v2_data.csv.gz', compression='gzip', sep='\t', index=False)
     print('Train:',train.info())
     print('Test:',test.info())
 
 
-# In[67]:
+# In[5]:
 
 
 if __name__ == "__main__":
@@ -139,7 +146,13 @@ if __name__ == "__main__":
     #merge_data()
 
 
-# In[ ]:
+# In[9]:
+
+
+
+
+
+# In[11]:
 
 
 
