@@ -4,7 +4,7 @@
 # <h1>Table of Contents<span class="tocSkip"></span></h1>
 # <div class="toc"><ul class="toc-item"></ul></div>
 
-# In[60]:
+# In[1]:
 
 
 import networkx as nx
@@ -19,7 +19,7 @@ from sklearn.model_selection import train_test_split
 warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
 
-# In[61]:
+# In[2]:
 
 
 class getNode2Vec:
@@ -70,7 +70,7 @@ class getNode2Vec:
         data.to_csv(self.path + 'emb.csv')
 
 
-# In[65]:
+# In[3]:
 
 
 def main(rootFolder):
@@ -99,7 +99,7 @@ def main(rootFolder):
         p.join()
 
 
-# In[66]:
+# In[4]:
 
 
 def merge_data(rootFolder):
@@ -125,24 +125,34 @@ def merge_data(rootFolder):
     networks_data = pd.concat(networks_data, axis=0)
     
     networks_data = networks_data.drop(columns=['from_id', 'to_id'])
-
+    '''
+    FOR UNSEEN DATA :
+    data = pd.concat([train,test],axis=0)
+    data.to_csv('./unseen-data/node2vec_v2_data.csv.gz',compression='gzip',sep='\t',index=False)
+    '''
     train, test = train_test_split(networks_data, test_size=0.25)
     train.to_csv(f'./{rootFolder}/node2vec_v2_train.csv.gz', compression='gzip', sep='\t', index=False)
-    test.to_csv(f'./{rootFolder}/node2vec_v2_test.csv.gz', compression='gzip', sep='\t', index=False)
+    networks_data.to_csv(f'./{rootFolder}/node2vec_v2_data.csv.gz', compression='gzip', sep='\t', index=False)
     print('Train:',train.info())
     print('Test:',test.info())
 
 
-# In[67]:
+# In[5]:
 
 
 if __name__ == "__main__":
-   # main('unseen-data')
+    #main()
     print('main')
-    merge_data('unseen-data')
+    #merge_data()
 
 
-# In[ ]:
+# In[9]:
+
+
+
+
+
+# In[11]:
 
 
 
