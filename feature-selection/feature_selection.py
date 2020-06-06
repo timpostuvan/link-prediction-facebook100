@@ -22,26 +22,42 @@ def read_data(file_name):
 
 	features = data.columns[:-1].to_numpy()
 
-	X_train = data.iloc[:10000, :-1].to_numpy()
+	X_train = data.iloc[:, :-1].to_numpy()
 	X_train = scaler.fit_transform(X_train)
-	y_train = data["label"].to_numpy()[:10000]
+	y_train = data["label"].to_numpy()
 
 
 	# Read and rescale test data
 	data = pd.read_table("../data/" + file_name + "_test.data")
 
-	X_test = data.iloc[:10000, :-1].to_numpy()
+	X_test = data.iloc[:, :-1].to_numpy()
 	X_test = scaler.fit_transform(X_test)
-	y_test = data["label"].to_numpy()[:10000]
+	y_test = data["label"].to_numpy()
 
 	return X_train, X_test, y_train, y_test, features, train_data
 
 
 
+def write_data(file_name, columns):
+	columns = np.append(columns, ["label"])
+
+	data = pd.read_table("../data/" + file_name + "_train.data")
+	filtered_data = data[columns]
+	filtered_data.to_csv("../data/" + file_name + "_train_filtered.data", sep="\t", index=False)
+
+	data = pd.read_table("../data/" + file_name + "_test.data")
+	filtered_data = data[columns]
+	filtered_data.to_csv("../data/" + file_name + "_test_filtered.data", sep="\t", index=False)
+
+	data = pd.read_table("../unseen-data/" + file_name + "_unseen.data")
+	filtered_data = data[columns]
+	filtered_data.to_csv("../unseen-data/" + file_name + "_unseen_filtered.data", sep="\t", index=False)
 
 
-#X_train, X_test, y_train, y_test, features, data = read_data("baseline")
-X_train, X_test, y_train, y_test, features, data = read_data("topological")
+
+
+X_train, X_test, y_train, y_test, features, data = read_data("baseline")
+#X_train, X_test, y_train, y_test, features, data = read_data("topological")
 #X_train, X_test, y_train, y_test, features, data = read_data("node2vec")
 
 
@@ -54,6 +70,18 @@ rfecv = RFECV(estimator=SVM_classifier, step=1, cv=StratifiedKFold(5),
 rfecv.fit(X_train, y_train)
 
 print("Optimal number of features : %d" % rfecv.n_features_)
+
+
+selected_features = np.array([features[i] for i in range(len(features)) if rfecv.support_[i]])
+print(selected_features)
+
+
+
+write_data("baseline", selected_features)
+#write_data("topological", selected_features)
+#write_data("node2vec", selected_features)
+
+
 
 # Plot accuracy 
 plt.figure()
