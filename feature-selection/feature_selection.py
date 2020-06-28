@@ -82,6 +82,7 @@ print(selected_features)
 #write_data("baseline", selected_features)
 #write_data("topological", selected_features)
 #write_data("node2vec", selected_features)
+write_data("node_based", selected_features)
 
 
 
