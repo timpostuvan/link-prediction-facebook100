@@ -57,10 +57,11 @@ def write_data(file_name, columns):
 
 
 
-#X_train, X_test, y_train, y_test, features, data = read_data("baseline")
+X_train, X_test, y_train, y_test, features, data = read_data("baseline")
 #X_train, X_test, y_train, y_test, features, data = read_data("topological")
 #X_train, X_test, y_train, y_test, features, data = read_data("node2vec")
-X_train, X_test, y_train, y_test, features, data = read_data("node_based")
+#X_train, X_test, y_train, y_test, features, data = read_data("node_based")
+
 
 
 print("Data read")
@@ -79,12 +80,6 @@ print(selected_features)
 
 
 
-#write_data("baseline", selected_features)
-#write_data("topological", selected_features)
-#write_data("node2vec", selected_features)
-write_data("node_based", selected_features)
-
-
 
 # Plot accuracy 
 plt.figure()
@@ -95,7 +90,6 @@ plt.show()
 
 
 
-
 # Decision tree feature importance
 decision_tree = ExtraTreesClassifier()
 decision_tree.fit(X_train, y_train)
@@ -103,10 +97,10 @@ decision_tree.fit(X_train, y_train)
 importances = decision_tree.feature_importances_
 indices = np.argsort(importances)
 
-plt.title('Feature Importances')
+
 plt.barh(range(len(indices)), importances[indices], color='b', align='center')
-plt.yticks(range(len(indices)), [features[i] for i in indices])
-plt.xlabel('Relative Importance')
+plt.yticks(range(len(indices)), [features[i] for i in indices], size=21, wrap=True)
+plt.xlabel('Relative Importance', size=21)
 plt.show()
 
 
@@ -116,7 +110,8 @@ plt.show()
 correlation_matrix = data.corr()
 top_correlation_features = correlation_matrix.index
 
-sns.heatmap(data[top_correlation_features].corr(), annot=True, cmap="RdYlGn")
+plt.rcParams['font.size'] = 16
+sns.heatmap(data[top_correlation_features].corr().round(2), annot=True, fmt=".2", cmap="RdYlGn")
 
 plt.ylim(15, 0)
 plt.xlim(0, 15)
