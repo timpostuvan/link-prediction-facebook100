@@ -92,13 +92,16 @@ print(selected_features)
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7cb1ea0ad7b9deae4a0b74b7f10f2f1b7dcadf3c
 # Plot accuracy 
 plt.figure()
 plt.xlabel("Number of features selected")
 plt.ylabel("Cross validation score (nb of correct classifications)")
 plt.plot(range(1, len(rfecv.grid_scores_) + 1), rfecv.grid_scores_)
 plt.show()
-
 
 
 
