@@ -92,10 +92,7 @@ print(selected_features)
 
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> 7cb1ea0ad7b9deae4a0b74b7f10f2f1b7dcadf3c
 # Plot accuracy 
 plt.figure()
 plt.xlabel("Number of features selected")
