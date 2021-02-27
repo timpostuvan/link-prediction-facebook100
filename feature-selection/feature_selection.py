@@ -16,7 +16,19 @@ def read_data(file_name):
 	
 	# Read and rescale train data	
 	data = pd.read_table("../data/" + file_name + "_train.data")
+
+
+#######################################################################################################
+
+	# Rename features as requested by the reviewer
+	rename_cols = {"is_dorm": "same_dorm", "is_year": "same_year", "from_high_school": "high_school_1",
+			  "to_high_school": "high_school_2", "from_major": "major_1", "to_major": "major_2",
+			  "is_faculty": "same_faculty", "is_gender": "same_gender"}
+
+	data.rename(columns=rename_cols, inplace=True)
+#######################################################################################################
 	
+
 	# Shuffle data
 	data = shuffle(data)
 	train_data = data
@@ -57,8 +69,8 @@ def write_data(file_name, columns):
 
 
 
-X_train, X_test, y_train, y_test, features, data = read_data("baseline")
-#X_train, X_test, y_train, y_test, features, data = read_data("topological")
+#X_train, X_test, y_train, y_test, features, data = read_data("baseline")
+X_train, X_test, y_train, y_test, features, data = read_data("topological")
 #X_train, X_test, y_train, y_test, features, data = read_data("node2vec")
 #X_train, X_test, y_train, y_test, features, data = read_data("node_based")
 
